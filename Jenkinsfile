@@ -16,6 +16,10 @@ pipeline {
           "Clean_check": {
             sh 'ls -al'
             
+          },
+          "Print Messsage": {
+            echo 'Hello world'
+            
           }
         )
       }
