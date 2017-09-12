@@ -1,24 +1,35 @@
 pipeline {
-    agent {
-        label 'master'
+  agent {
+    node {
+      label 'master'
     }
     
-    stages {
-        stage('Clean') {
-            steps {
-                sh 'rm -rf ./test'
-            }
-        }
-        stage('Clone') {
-            steps {
-                sh 'git clone https://github.com/all4dich/jenkins-manager-groovy.git ./test'
-            }
-        }
-        stage('Browse') {
-            steps {
-                sh 'ls -al'
-                sh 'pwd'
-            }
-        }
+  }
+  stages {
+    stage('Clean') {
+      steps {
+        parallel(
+          "Clean": {
+            sh 'rm -rf ./test'
+            
+          },
+          "Clean_check": {
+            sh 'ls -al'
+            
+          }
+        )
+      }
     }
+    stage('Clone') {
+      steps {
+        sh 'git clone https://github.com/all4dich/jenkins-manager-groovy.git ./test'
+      }
+    }
+    stage('Browse') {
+      steps {
+        sh 'ls -al'
+        sh 'pwd'
+      }
+    }
+  }
 }
