@@ -1,39 +1,22 @@
-pipeline {
-  agent {
-    node {
-      label 'master'
+import jenkins.model.*
+//import hudson.*
+
+// get current thread / Executor
+//def thr = Thread.currentThread()
+// get current build
+//def build = thr?.executable
+
+node('master'){
+    stage("Get Each Node's label"){
+        Jenkins.instance.nodes?.each {
+            println "${it.labelString}"
+        }
+        sh 'ls'
     }
     
-  }
-  stages {
-    stage('Clean') {
-      steps {
-        parallel(
-          "Clean": {
-            sh 'rm -rf ./test'
-            
-          },
-          "Clean_check": {
-            sh 'ls -al'
-            
-          },
-          "Print Messsage": {
-            echo 'Hello world'
-            
-          }
-        )
-      }
+    stage("Get All labels"){
+        Jenkins.instance.labels?.each {
+            println "${it.name}"
+        }
     }
-    stage('Clone') {
-      steps {
-        sh 'git clone https://github.com/all4dich/jenkins-manager-groovy.git ./test'
-      }
-    }
-    stage('Browse') {
-      steps {
-        sh 'ls -al'
-        sh 'pwd'
-      }
-    }
-  }
 }
