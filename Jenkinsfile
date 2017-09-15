@@ -13,10 +13,10 @@ pipeline {
                 sh 'npm --version'
             }
         }
-        stage('nodejs') {
+        stage('ruby') {
             agent { docker 'ruby' }
             steps {
-                sh 'npm --version'
+                sh 'ruby --version'
             }
         }
         stage('python') {
