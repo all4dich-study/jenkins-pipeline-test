@@ -3,8 +3,11 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                node('master') {
-                    sh "ls"
+                parallel first: {
+                    echo 'first' 
+                },
+                second: {
+                    echo 'second'
                 }
             }
         }
