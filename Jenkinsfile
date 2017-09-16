@@ -4,10 +4,14 @@ pipeline {
         stage('Test') {
             steps {
                 parallel first: {
-                    echo 'first' 
+                    node('master'){
+                    echo env.NODE_NAME
+                    }
                 },
                 second: {
-                    echo 'second'
+                    node('agent1'){
+                    echo env.NODE_NAME
+                    }
                 }
             }
         }
