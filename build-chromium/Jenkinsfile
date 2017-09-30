@@ -58,7 +58,7 @@ pipeline {
                         } else {
                             sh './build/install-build-deps.sh --no-prompt'
                             sh 'gclient runhooks'
-                            sh 'time rm -rf out/'
+                            sh "/bin/bash -c 'time rm -rf out/'"
                             sh 'gn gen out/Default'
                         }
                     }
@@ -80,7 +80,7 @@ pipeline {
                             time ninja -C out/Default chrome'
                             '''
                         } else {
-                            sh '/usr/bin/time time ninja -C out/Default chrome'
+                            sh "/bin/bash -c 'time ninja -C out/Default chrome'"
                         }
                     }
                     
