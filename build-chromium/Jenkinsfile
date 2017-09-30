@@ -1,0 +1,78 @@
+pipeline {
+    agent {
+        label 'build-chrome'
+    }
+    environment { 
+        IP  = '10.0.3.144'
+    }
+    stages{
+        stage('Install requirements') {
+            steps {
+                sh 'sudo apt-get install -y python'
+            }
+        }
+        stage('Get code') {
+            steps {
+                /*
+                dir('chromium') {
+                    deleteDir()
+                }
+                dir('chromium') {
+                    sh '''
+                        fetch --nohooks chromium || gclient sync
+                    '''
+                }
+                */
+                echo "Pass"
+                script {
+                    currentBuild.description = "${env.AGENT}"
+                }
+            }
+        }
+        stage('Prepare') {
+            steps {
+                dir('chromium/src') {
+                    //./build/install-build-deps.sh --no-prompt
+                    /*
+                    sh '''
+                    gclient runhooks
+                    '''
+                    */
+                    script {
+                        if ( env.AGENT == "lxc") {
+                            sh '''
+                            ssh ubuntu@10.0.3.144 'pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
+                            ./build/install-build-deps.sh --no-prompt && \
+                            gclient runhooks && \
+                            time rm -rf out && \
+                            gn gen out/Default'
+                            '''    
+                        } else {
+                            sh './build/install-build-deps.sh --no-prompt'
+                            sh 'gclient runhooks'
+                            sh 'time rm -rf out/'
+                            sh 'gn gen out/Default'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps{
+                dir('chromium/src'){
+                    script {
+                        if (env.AGENT == "lxc") {
+                            sh '''
+                            ssh ubuntu@10.0.3.144 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
+                            time ninja -C out/Default chrome'
+                            '''
+                        } else {
+                            sh 'time ninja -C out/Default chrome'
+                        }
+                    }
+                    
+                }
+            }
+        }
+    }
+}
