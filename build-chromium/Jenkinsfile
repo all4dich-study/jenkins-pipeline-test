@@ -80,7 +80,7 @@ pipeline {
                             time ninja -C out/Default chrome'
                             '''
                         } else {
-                            sh 'time ninja -C out/Default chrome'
+                            sh '/usr/bin/time time ninja -C out/Default chrome'
                         }
                     }
                     
