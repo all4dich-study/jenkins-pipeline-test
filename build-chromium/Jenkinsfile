@@ -47,6 +47,14 @@ pipeline {
                             time rm -rf out && \
                             gn gen out/Default'
                             '''    
+                        } else if ( env.AGENT == "docker") {
+                            sh '''
+                            ssh ubuntu@172.17.0.2 'pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
+                            ./build/install-build-deps.sh --no-prompt && \
+                            gclient runhooks && \
+                            time rm -rf out && \
+                            gn gen out/Default'
+                            '''
                         } else {
                             sh './build/install-build-deps.sh --no-prompt'
                             sh 'gclient runhooks'
@@ -64,6 +72,11 @@ pipeline {
                         if (env.AGENT == "lxc") {
                             sh '''
                             ssh ubuntu@10.0.3.144 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
+                            time ninja -C out/Default chrome'
+                            '''
+                        } else if (env.AGENT == "docker") {
+                            sh '''
+                            ssh ubuntu@172.17.0.2 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
                             time ninja -C out/Default chrome'
                             '''
                         } else {
