@@ -3,7 +3,8 @@ pipeline {
         label 'build-chrome'
     }
     environment { 
-        IP  = '10.0.3.144'
+        LXC_IP  = '10.0.3.144'
+        DOCKER_IP = '172.17.0.2'
     }
     stages{
         stage('Install requirements') {
