@@ -11,7 +11,9 @@ pipeline {
                 script {
                     if ( env.AGENT == "lxc" ) {
                         sh 'sudo lxc-attach -n build-poky -- apt-get install -y chrpath cpp diffstat g++ gawk gcc patch build-essential texinfo'
-                    }else{
+                    } else if ( env.AGENT == "docker") {
+                        echo "Docker based...."
+                    } else{
                         sh 'sudo apt-get install -y chrpath cpp diffstat g++ gawk gcc patch build-essential texinfo'
                     }
                 }
@@ -43,6 +45,8 @@ pipeline {
                 script {
                     if ( env.AGENT == "lxc" ) {
                         sh "ssh ubuntu@${LXC_IP} 'pushd ${env.WORKSPACE}/poky && . oe-init-build-env && time bitbake core-image-minimal '"
+                    } else if ( env.AGENT == "docker" ) {
+                        sh "sudo docker run --rm --name build-poky -u ubuntu -w ${env.WORKSPACE}/poky -v /home/ubuntu:/home/ubuntu -v /starfish:/starfish build-poky /bin/bash -c '. oe-init-build-env && time bitbake core-image-minimal'"
                     } else {
                         dir('poky') {
                             sh "/bin/bash -c '. oe-init-build-env && time bitbake core-image-minimal'"
