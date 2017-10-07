@@ -1,0 +1,55 @@
+pipeline {
+    agent {
+        label 'build-poky'
+    }
+    environment { 
+        LXC_IP  = '10.0.3.209'
+    }
+    stages{
+        stage('Install requirements') {
+            steps {
+                script {
+                    if ( env.AGENT == "lxc" ) {
+                        sh 'sudo lxc-attach -n build-poky -- apt-get install -y chrpath cpp diffstat g++ gawk gcc patch build-essential texinfo'
+                    }else{
+                        sh 'sudo apt-get install -y chrpath cpp diffstat g++ gawk gcc patch build-essential texinfo'
+                    }
+                }
+            }
+        }
+        stage('Get code') {
+            steps {
+                script {
+                    currentBuild.description = "${env.AGENT}"
+                }
+                sh 'rm -rf poky'
+                dir('poky') {
+                    git 'git://git.yoctoproject.org/poky'
+                }
+            }
+        }
+        stage('Prepare') {
+            steps {
+                dir('poky') {
+                    sh "/bin/bash -c '. oe-init-build-env'"
+                }
+                dir('poky/build/conf') {
+                    sh "/bin/bash -c 'cat ~/local.conf >> local.conf'"
+                }
+            }
+        }
+        stage('Build') {
+            steps{
+                script {
+                    if ( env.AGENT == "lxc" ) {
+                        sh "ssh ubuntu@${LXC_IP} 'pushd ${env.WORKSPACE}/poky && . oe-init-build-env && time bitbake core-image-minimal '"
+                    } else {
+                        dir('poky') {
+                            sh "/bin/bash -c '. oe-init-build-env && time bitbake core-image-minimal'"
+                        } 
+                    }
+                }
+            }
+        }
+    }
+}
