@@ -13,7 +13,7 @@ pipeline {
                         sh 'sudo lxc-attach -n build-poky -- apt-get install -y chrpath cpp diffstat g++ gawk gcc patch build-essential texinfo'
                     } else if ( env.AGENT == "docker") {
                         echo "Docker based...."
-                        sh 'sudo docker rm -f build-poky'
+                        sh 'sudo docker rm -f build-poky || echo "build-poky had been destroyed"'
                     } else{
                         sh 'sudo apt-get install -y chrpath cpp diffstat g++ gawk gcc patch build-essential texinfo'
                     }
@@ -60,6 +60,9 @@ pipeline {
     post {
         always {
             build job: 'build-poky', parameters: [string(name: 'AGENT', value: "${env.AGENT}")], wait: false
+        }
+        success {
+            archiveArtifacts allowEmptyArchive: true, artifacts: 'poky/build/tmp/buildstats/**/*, poky/build/tmp/log/**/*'
         }
     }
 }
