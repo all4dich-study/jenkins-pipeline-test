@@ -4,6 +4,8 @@ pipeline {
     }
     environment { 
         LXC_IP  = '10.0.3.209'
+        BUILD_TIME_CMD = "/usr/bin/time "
+        BUILD_TIME_STR = "TIME: %e %S %U %P %c %w %R %F %M %x %C"
     }
     stages{
         stage('Install requirements') {
@@ -45,12 +47,12 @@ pipeline {
             steps{
                 script {
                     if ( env.AGENT == "lxc" ) {
-                        sh "ssh ubuntu@${LXC_IP} 'pushd ${env.WORKSPACE}/poky && . oe-init-build-env && time bitbake core-image-minimal '"
+                        sh "ssh ubuntu@${LXC_IP} 'pushd ${env.WORKSPACE}/poky && . oe-init-build-env && ${BUILD_TIME_CMD} -f \"${BUILD_TIME_STR}\" bitbake core-image-minimal '"
                     } else if ( env.AGENT == "docker" ) {
-                        sh "sudo docker run --privileged=true --rm=true --name build-poky -u ubuntu -w ${env.WORKSPACE}/poky -v /home/ubuntu:/home/ubuntu -v /starfish:/starfish build-poky /bin/bash -c '. oe-init-build-env && time bitbake core-image-minimal'"
+                        sh "sudo docker run --privileged=true --rm=true --name build-poky -u ubuntu -w ${env.WORKSPACE}/poky -v /home/ubuntu:/home/ubuntu -v /starfish:/starfish build-poky /bin/bash -c '. oe-init-build-env &&  ${BUILD_TIME_CMD} -f \"${BUILD_TIME_STR}\" bitbake core-image-minimal'"
                     } else {
                         dir('poky') {
-                            sh "/bin/bash -c '. oe-init-build-env && time bitbake core-image-minimal'"
+                            sh "/bin/bash -c '. oe-init-build-env &&  ${BUILD_TIME_CMD} -f \"${BUILD_TIME_STR}\" bitbake core-image-minimal'"
                         } 
                     }
                 }
