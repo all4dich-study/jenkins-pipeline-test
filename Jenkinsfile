@@ -1,39 +1,24 @@
 pipeline {
-  agent {
-    node {
-      label 'master'
+    agent  any
+    stages {
+        stage('first') {
+            steps {
+                deleteDir()
+                sh 'mkdir 1 && mkdir 2'
+                sh 'echo 1 > 1/out.txt'
+                sh 'echo 2 > 2/out.txt'
+                sh 'ps -ef > 1/process.txt'
+                sh 'cat 1/process.txt'
+                
+            }
+        }
     }
-    
-  }
-  stages {
-    stage('Clean') {
-      steps {
-        parallel(
-          "Clean": {
-            sh 'rm -rf ./test'
-            
-          },
-          "Clean_check": {
-            sh 'ls -al'
-            
-          },
-          "Print Messsage": {
-            echo 'Hello world'
-            
-          }
-        )
-      }
+    post {
+        success {
+            archiveArtifacts allowEmptyArchive: true, artifacts: '1/**/*, 2/**/*'
+            script {
+                currentBuild.description = currentBuild.rawBuild.getLog(10)
+            }
+        }
     }
-    stage('Clone') {
-      steps {
-        sh 'git clone https://github.com/all4dich/jenkins-manager-groovy.git ./test'
-      }
-    }
-    stage('Browse') {
-      steps {
-        sh 'ls -al'
-        sh 'pwd'
-      }
-    }
-  }
 }
