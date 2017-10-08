@@ -61,7 +61,7 @@ pipeline {
     }
     post {
         always {
-            build job: 'build-poky', parameters: [string(name: 'AGENT', value: "${env.AGENT}")], wait: false
+            build job: "${env.JOB_NAME}", parameters: [string(name: 'AGENT', value: "${env.AGENT}")], wait: false
         }
         success {
             archiveArtifacts allowEmptyArchive: true, artifacts: 'poky/build/tmp/buildstats/**/*, poky/build/tmp/log/**/*'
