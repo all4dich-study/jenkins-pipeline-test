@@ -1,10 +1,13 @@
 pipeline {
     agent {
         label 'build-chrome'
+
     }
     environment { 
         LXC_IP  = '10.0.3.144'
         DOCKER_IP = '172.17.0.2'
+        BUILD_TIME_CMD = "/usr/bin/time "
+        BUILD_TIME_STR = "TIME: %e %S %U %P %c %w %R %F %M %x %C"
     }
     stages{
         stage('Install requirements') {
@@ -71,17 +74,11 @@ pipeline {
                 dir('chromium/src'){
                     script {
                         if (env.AGENT == "lxc") {
-                            sh '''
-                            ssh ubuntu@10.0.3.144 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
-                            time ninja -C out/Default chrome'
-                            '''
+                            sh " ssh ubuntu@10.0.3.144 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && ${BUILD_TIME_CMD} -f \"${BUILD_TIME_STR}\"  ninja -C out/Default chrome'"
                         } else if (env.AGENT == "docker") {
-                            sh '''
-                            ssh ubuntu@172.17.0.2 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && \
-                            time ninja -C out/Default chrome'
-                            '''
+                            sh "ssh ubuntu@172.17.0.2 ' pushd ~/jenkins_home/workspace/build-chrome/chromium/src && ${BUILD_TIME_CMD} -f \"${BUILD_TIME_STR}\" ninja -C out/Default chrome'"
                         } else {
-                            sh "/bin/bash -c 'time ninja -C out/Default chrome'"
+                            sh "/bin/bash -c '${BUILD_TIME_CMD}  -f \"${BUILD_TIME_STR}\" ninja -C out/Default chrome'"
                         }
                     }
                     
@@ -89,4 +86,10 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            build job: "${env.JOB_NAME}", parameters: [string(name: 'AGENT', value: "${env.AGENT}")], wait: false
+        }
+    }
+
 }
