@@ -12,6 +12,7 @@ pipeline {
                 script {
                     jira_call_url = "https://jira2.lgsvl.com/rest/api/2/search?jql=project%20%3D%20GLD4TV%20AND%20issuetype%20in%20%28%22CCC%20Task%22%2C%20%22Automated%20CCC%22%29%20AND%20status%20in%20%28Build%29%20AND%20summary%20%7E%20CCC%3A%20AND%20updated%20%3E%20startOfDay%28%29%20ORDER%20BY%20key%20ASC"
                     command = "curl -D- -u '${env.USER}:${env.PASSWORD}' -X GET -H 'Content-Type: application/json' " + jira_call_url + "  > json-temp.txt"
+                    sh script: command
                     json_str = sh(name: "Run JQL Query2", script: 'cat json-temp.txt | grep ^{', returnStdout: true).trim()
                     json_obj = readJSON text: json_str
                     echo json_obj['expand']
